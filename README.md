@@ -1,5 +1,3 @@
-Ekklesia Build & Deployment Playbook
-====================================
+Ansible Docker Buildblocks
+==========================
 
-
-[Ansible](http://ansible.com) Playbook + Vagrantfile for building and deploying the Ekklesia eDemocracy platform.

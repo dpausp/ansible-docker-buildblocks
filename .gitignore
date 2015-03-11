@@ -1,0 +1,7 @@
+ansible.sqlite
+hosts*
+!hosts.example
+.vagrant
+secret*.yml
+group_vars/*
+!group_vars/*.example
