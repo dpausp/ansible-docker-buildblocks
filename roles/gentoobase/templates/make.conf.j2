@@ -1,0 +1,12 @@
+CFLAGS="-O2 -pipe"
+CXXFLAGS="${CFLAGS}"
+CHOST="x86_64-pc-linux-gnu"
+USE="bindist mmx sse sse2"
+PORTDIR="/usr/portage"
+DISTDIR="${PORTDIR}/distfiles"
+PKGDIR="${PORTDIR}/packages"
+MAKEOPTS="-j{{ ansible_processor_cores }}"
+GENTOO_MIRRORS="{{ gentoo_mirrors }}"
+PORTAGE_NICENESS=3
+FEATURES="${FEATURES}{{ ' buildpkg' if gentoo_use_binpkgs }}"
+EMERGE_DEFAULT_OPTS="${EMERGE_DEFAULT_OPTS}{{ ' --usepkg' if gentoo_use_binpkgs }}"

@@ -1,0 +1,63 @@
+---
+- name: setup make.conf
+  template: src=make.conf.j2 dest=/etc/portage/make.conf
+
+- name: setup locale.gen file
+  tags: locale
+  template: src=locale.gen.j2 dest=/etc/locale.gen
+
+- name: copy cleanup script
+  tags: installation
+  copy: src=gentoo_system_cleanup.zsh dest=/usr/local/sbin/ mode=0700
+
+- name: run locale-gen
+  tags: locale
+  command: locale-gen
+
+# emerge is used here because gentoolkit must be installed before using the ansible portage module
+- name: install gentoolkit
+  command: emerge gentoolkit
+
+- name: install vim
+  portage: package=vim newuse=yes state=present
+
+- name: install zsh
+  tags: zsh
+  portage: package=zsh newuse=yes state=present
+
+- name: setup zsh config in skel
+  tags: zsh
+  get_url: url=http://git.grml.org/f/grml-etc-core/etc/zsh/zshrc dest=/etc/skel/.zshrc
+
+- name: copy zsh config to root dir
+  tags: zsh
+  command: creates=/root/.zshrc cp /etc/skel/.zshrc /root/
+
+- name: set zsh as default shell for new users
+  tags: zsh
+  lineinfile:
+    dest: /etc/default/useradd
+    regexp: "^SHELL="
+    line: "SHELL=/bin/zsh"
+    state: present
+
+- name: set zsh as default shell for existing bash users
+  tags: zsh
+  replace:
+    dest: /etc/passwd
+    regexp: "/bin/bash"
+    replace: "/bin/zsh"
+
+- name: install sudo
+  tags: installation
+  portage: package=sudo newuse=yes state=present
+
+- name: add global known hosts file
+  tags: installation
+  copy: src=ssh_known_hosts dest=/etc/ssh/ssh_known_hosts
+
+- include: cleanup.yml
+  tags: [installation, cleanup]
+  when: do_cleanup
+
+# vim: set sw=2 ts=2 sts=2 expandtab:

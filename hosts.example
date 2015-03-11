@@ -1,0 +1,6 @@
+[localhost]
+# set python interpreter for NixOS
+localhost ansible_connection=local # ansible_python_interpreter="/usr/bin/env python"
+
+[build_gentoobase]
+# build_gentoobase image_name=gentoobase local_portage_path=~/docker/gentoo/portage gentoo_arch=amd64 gentoo_variant=hardened+nomultilib

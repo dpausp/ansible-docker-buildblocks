@@ -1,0 +1,67 @@
+---
+### Gentoo base image bootstrap playbook
+
+# 1. create basic docker image from the latest stage3 tarball and start a build container from it
+# 2. run the gentoo role on the build container and commit changes
+# 3. export the resulting image and do a "clean" reimport
+
+- name: prepare and start gentoo build container
+  hosts: localhost
+  connection: local
+  vars:
+    gentoo_arch: amd64
+    gentoo_variant: hardened+nomultilib
+    tmpdir: /tmp/
+    local_portage_path: "{{ lookup('env','HOME') }}/docker/gentoo/portage"
+  tasks:
+    - name: import gentoo3 stage...
+      script: scripts/docker-mkimage-gentoo.sh {{ gentoo_arch }} {{ gentoo_variant }} --ignore
+
+    - name: run build docker container
+      docker: 
+        image: gentoo/gentoo-{{ gentoo_arch }}-{{ gentoo_variant|replace("+", "-") }}
+        name: build_gentoobase
+        volumes: "{{ local_portage_path }}:/usr/portage"
+        state: running
+        tty: yes
+        command: sleep infinity
+
+    - name: add docker container as ansible host for setup
+      add_host: groups=build_gentoobase name=build_gentoobase
+
+
+- name: setup gentoo base image
+  hosts: build_gentoobase
+  connection: docker
+  roles:
+    - role: gentoobase
+      tags: gentoobase
+      # vars passed to role
+      container_install: yes
+
+- name: finish docker image
+  hosts: localhost
+  connection: local
+  vars:
+    image_name: gentoobase
+
+  tasks:
+    - name: export image
+      tags: export
+      shell: docker export build_gentoobase > /tmp/{{ image_name }}.tar
+
+    - name: reimport clean image
+      tags: reimport
+      shell: docker import - < /tmp/{{ image_name }}.tar
+      register: image_import
+
+    - name: tag imported image
+      tags: reimport
+      command: docker tag -f {{ image_import.stdout }} {{ image_name }}
+
+    - name: remove docker build container
+      tags: remove_build_container
+      command: docker rm -f build_gentoobase
+
+
+# vim: set sw=2 ts=2 sts=2 expandtab:
