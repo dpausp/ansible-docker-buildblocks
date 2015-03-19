@@ -22,6 +22,9 @@
         image: gentoo/gentoo-{{ gentoo_arch }}-{{ gentoo_variant|replace("+", "-") }}
         name: build_gentoobase
         volumes: "{{ local_portage_path }}:/usr/portage"
+        # the tty is needed for zsh in the container via docker exec, for example. 
+        # This is helpful for build debugging, but not mandatory.
+        tty: yes
         state: running
         tty: yes
         command: sleep infinity

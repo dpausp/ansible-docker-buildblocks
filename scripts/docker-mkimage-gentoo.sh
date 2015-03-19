@@ -188,6 +188,7 @@ function fetchversion() {
 } # fetchversion
 
 function getstage3() {
+
 	local mirror arch snapshot destination variant
 	local -i rc=0
 	eval $( std::parseargs -- "${@}" ) || {
@@ -451,15 +452,14 @@ function main() {
 
 	info "Importing '${stage3}' into docker ..."
 	if (( action )); then
-		dockerimage=$( bzip2 -9cd "${destination}/${stage3}" | docker import - "${vertag}" )
-
-		rm "${destination}/${stage3}"
+        tarfile="${destination}/stage.tar"
+        bzip2 -dc "${destination}/${stage3}" > $tarfile
+        tar --wildcards --delete -f $tarfile './dev/*'
+        dockerimage=$(docker import - "${NAMESPACE}/${vertag}" < "${destination}/stage.tar")
+		rm "${destination}/stage.tar"
 		rmdir "${destination}"
 
-		docker tag "${dockerimage}" "${NAMESPACE}/${vertag}" || return ${?}
-		docker tag "${dockerimage}" "${NAMESPACE}/${tag}:latest" || return ${?}
-
-		# docker push $NAMESPACE/$vertag
+        docker tag -f "${dockerimage}" "${NAMESPACE}/${tag}:latest" || return ${?}
 	fi
 
 	info "Image '${NAMESPACE}/${vertag}' successfully imported"
