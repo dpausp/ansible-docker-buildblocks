@@ -1,0 +1,28 @@
+---
+- name: prepare and start gentoo build container
+  hosts: localhost
+  connection: local
+  vars:
+    tmpdir: /tmp/
+    local_portage_path: "{{ lookup('env','HOME') }}/docker/gentoo/portage"
+    build_container: build_gentoo_{{ name }}
+    build_group: build_gentoo_{{ name }}
+  tasks:
+    - name: run build docker container
+      tags: installation
+      docker: 
+        image: gentoobase
+        name: "{{ build_container }}"
+        volumes: "{{ local_portage_path }}:/usr/portage"
+        # the tty is needed for zsh in the container via docker exec, for example. 
+        # This is helpful for build debugging, but not mandatory.
+        tty: yes
+        state: running
+        command: sleep infinity
+
+    - name: add docker container as ansible host for setup
+      tags: always
+      add_host: groups={{ build_group }} name={{ build_container }}
+
+
+# vim: set sw=2 ts=2 sts=2 expandtab:

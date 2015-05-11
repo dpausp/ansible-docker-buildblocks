@@ -1,0 +1,32 @@
+---
+- name: finish gentoo {{ name }} docker image
+  hosts: localhost
+  connection: local
+  vars:
+    image: gentoo_{{ name }}
+    build_container: build_gentoo_{{ name }}
+    dockerfile_path: ../docker/{{ name }}
+
+  tasks:
+    - name: commit docker build to base image
+      tags: [docker_build_image, docker_image]
+      command: docker commit {{ build_container }} intermediate_{{ image }}
+
+    - name: build final image from base image
+      tags: [docker_build_image, docker_image]
+      docker_image: path={{ dockerfile_path }} name={{ image }} state=build
+
+    - name: export image
+      tags: [docker_export_image, docker_image]
+      shell: docker save {{ image }} > /tmp/{{ image }}.tar
+
+    - name: remove docker build container
+      tags: [docker_cleanup, docker_image]
+      command: docker rm -f {{ build_container }}
+
+    - name: untag intermediate image
+      tags: [docker_cleanup, docker_image]
+      command: docker rmi intermediate_{{ image }}
+
+
+# vim: set sw=2 ts=2 sts=2 expandtab:

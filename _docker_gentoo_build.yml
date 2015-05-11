@@ -1,0 +1,31 @@
+---
+### Gentoo image on top on gentoobase with an applied role
+
+# 1. start build container from gentoobase image
+# 2. apply the role given by {{ name }} to the build container and commit changes to an intermediate image
+# 3. build final image based on intermediate with Dockerfile in ../docker/{{ name }} and export image
+
+- include: _docker_gentoo_prepare_build.yml name={{ name }}
+
+- name: setup image
+  hosts: build_gentoo_{{ name }}
+  connection: docker
+  roles:
+    - role: "{{ name }}"
+      tags: "{{ name }}"
+      # vars passed to role
+      container_install: yes
+
+  tasks:
+    - name: remove unneeded packages
+      tags: [installation, cleanup]
+      portage: depclean=yes
+
+    - name: run cleanup script
+      tags: [installation, cleanup]
+      command: /usr/local/sbin/gentoo_system_cleanup.zsh
+
+- include: _docker_gentoo_finish_image.yml name={{ name }}
+
+
+# vim: set sw=2 ts=2 sts=2 expandtab:
