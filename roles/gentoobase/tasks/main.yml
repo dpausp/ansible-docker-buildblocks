@@ -18,6 +18,9 @@
 - name: install gentoolkit
   command: emerge gentoolkit
 
+- name: deep world update
+  portage: package=@world newuse=yes update=yes deep=yes 
+
 - name: install vim
   portage: package=vim newuse=yes state=present
 
