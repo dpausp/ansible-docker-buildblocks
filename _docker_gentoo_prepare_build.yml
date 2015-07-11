@@ -5,8 +5,8 @@
   vars:
     tmpdir: /tmp/
     local_portage_path: "{{ lookup('env','HOME') }}/docker/gentoo/portage"
-    build_container: build_gentoo_{{ name }}
-    build_group: build_gentoo_{{ name }}
+    build_container: build_{{ name }}
+    build_group: build_{{ name }}
   tasks:
     - name: run build docker container
       tags: installation

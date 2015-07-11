@@ -8,7 +8,7 @@
 - include: _docker_gentoo_prepare_build.yml name={{ name }}
 
 - name: setup image
-  hosts: build_gentoo_{{ name }}
+  hosts: build_{{ name }}
   connection: docker
   roles:
     - role: "{{ name }}"

@@ -3,8 +3,8 @@
   hosts: localhost
   connection: local
   vars:
-    image: gentoo_{{ name }}
-    build_container: build_gentoo_{{ name }}
+    image: "{{ name }}"
+    build_container: build_{{ name }}
     dockerfile_path: ../docker/{{ name }}
 
   tasks:
