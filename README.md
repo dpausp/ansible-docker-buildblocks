@@ -15,7 +15,7 @@ Prior to using these includes, a gentoo base image must be built.
 
 Run `ansible-playbook docker_gentoobase.yml` to build the gentoo image on which all gentoo containers will be based on. 
 The image will be called `gentoobase`. Settings are defined in the vars section of `docker_gentoobase.yml`. 
-They can be overriden in the `hosts` file (see `hosts.example`) or in `group_vars/all`.
+They can be overriden in the `hosts` file (see `hosts.example`), in `group_vars/all` or `group_vars/gentoobase`.
 
 ### Building Derived Images
 
@@ -34,20 +34,27 @@ The easiest way is to checkout this project alongside your playbook and symlink 
             └── yourrole
 
 
-For docker images with only one ansible role on top of gentoobase:
+For docker images with a single ansible role on top of gentoobase:
 -   include `_docker_build.yml` somewhere in your playbook
 -   set the variable `name` to the name of the role that should be applied.
--   create a Dockerfile in ../docker/{{ role name }} 
+-   create a Dockerfile in `../docker/{{ role name }}`
 
 The location of the Dockerfile directory can be changed by setting `dockerfile_path`.
 You can put additional commands in the Dockerfile. The file must contain the following line:
 
-    FROM intermediate_gentoo_{{ role name }}
+    FROM intermediate_{{ role name }}
 
 Running your playbook will start a build container from the gentoo base image and apply the specified role to it.
 The state of the container will be commited to an intermediate image.
-Finally, a image called `gentoo_{{ role name }}` will be built on top of the intermediate image by using the Dockerfile you created.
+Finally, a image called `{{ role name }}` will be built on top of the intermediate image by using the Dockerfile you created.
 
 For more complex scenarios, have a look at the contents of `_docker_build.yml` as inspiration. Have fun :)
 
+## Authors
+
+* dpausp
+
+## License
+
+GNU Affero General Public License v3, see LICENSE.
 
